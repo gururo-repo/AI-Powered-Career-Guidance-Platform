@@ -17,22 +17,30 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       // We'll attempt the API call
       await api.post('/api/auth/forgot-password', { email });
-      
+
       // Even if there's an error (user doesn't exist), we show success for security
       setSuccess(true);
     } catch (error) {
       console.error('Forgot password error:', error);
-      
-      // We still show success even on error for security reasons
-      // Only show technical errors if it's a server problem
-      if (error.response?.status >= 500) {
+
+      // Check for rate limit error (429)
+      if (error.response?.status === 429) {
+        setError('Too many password reset attempts. Please try again later.');
+      }
+      // Check for server errors
+      else if (error.response?.status >= 500) {
         setError('Server error. Please try again later.');
-      } else {
-        // For any other error, still show success message for security
+      }
+      // For email validation errors, show the specific message
+      else if (error.response?.status === 400 && error.response?.data?.errors) {
+        setError(error.response.data.errors[0]?.msg || 'Invalid email format.');
+      }
+      // For any other error, still show success message for security
+      else {
         setSuccess(true);
       }
     } finally {
@@ -52,7 +60,7 @@ const ForgotPassword = () => {
           {success ? (
             <Alert className="bg-emerald-900/50 border-emerald-800 text-emerald-200 mb-4">
               <AlertDescription>
-                If the email exists in our system, a password reset link has been sent. 
+                If the email exists in our system, a password reset link has been sent.
                 Please check your inbox and follow the instructions.
               </AlertDescription>
             </Alert>
@@ -74,14 +82,14 @@ const ForgotPassword = () => {
                   />
                 </div>
               </div>
-              
+
               {error && (
                 <div className="text-red-400 text-sm py-2">
                   {error}
                 </div>
               )}
-              
-              <Button 
+
+              <Button
                 type="submit"
                 className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
                 disabled={loading}

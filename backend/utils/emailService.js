@@ -61,6 +61,8 @@ export const sendPasswordResetEmail = async (email, token) => {
     const resetUrl = `${baseUrl}/reset-password/${token}`;
 
     logger.info(`Generated reset URL: ${resetUrl}`);
+    logger.info(`Sending password reset email to: ${email}`);
+    logger.info(`Using email configuration: Host=${process.env.EMAIL_HOST}, Port=${process.env.EMAIL_PORT}, Secure=${process.env.EMAIL_SECURE}`);
 
     // Email subject and content
     const mailOptions = {
@@ -84,12 +86,36 @@ export const sendPasswordResetEmail = async (email, token) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    logger.info(`Password reset email sent to: ${email}`);
+    // Add more detailed logging for debugging
+    logger.info('Attempting to send email with the following options:', {
+      to: email,
+      from: process.env.EMAIL_FROM,
+      subject: mailOptions.subject
+    });
+
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`Password reset email sent to: ${email}`, {
+      messageId: info.messageId,
+      response: info.response
+    });
     return true;
   } catch (error) {
-    logger.error('Failed to send password reset email:', error);
-    throw new Error('Failed to send password reset email');
+    logger.error('Failed to send password reset email:', {
+      error: error.message,
+      stack: error.stack,
+      email: email
+    });
+
+    // Check for specific nodemailer errors
+    if (error.code === 'EAUTH') {
+      logger.error('Authentication error with email provider. Check credentials.');
+    } else if (error.code === 'ESOCKET') {
+      logger.error('Socket error when connecting to email provider.');
+    } else if (error.code === 'ECONNECTION') {
+      logger.error('Connection error with email provider.');
+    }
+
+    throw new Error(`Failed to send password reset email: ${error.message}`);
   }
 };
 

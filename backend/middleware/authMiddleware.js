@@ -13,8 +13,10 @@ export const loginLimiter = rateLimit({
 
 export const resetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3, // limit each IP to 3 password reset attempts per hour
-  message: "Too many password reset attempts, please try again after an hour"
+  max: 10, // increased from 3 to 10 attempts per hour
+  message: "Too many password reset attempts, please try again after an hour",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // CSRF protection
@@ -48,34 +50,34 @@ export const authMiddleware = async (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'No token, authorization denied' });
     }
-    
+
     const token = authHeader.split(' ')[1];
-    
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // Find user with this ID
     const user = await User.findById(decoded.id).select('-password');
-    
+
     // If no user found
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
-    
+
     // Add user to request
     req.user = user;
-    
+
     // Log authenticated request
     logger.info(`Authenticated request: ${req.method} ${req.originalUrl}`, {
       userId: user._id,
       method: req.method,
       path: req.originalUrl
     });
-    
+
     next();
   } catch (error) {
     logger.error('Authentication error:', error);
@@ -86,8 +88,8 @@ export const authMiddleware = async (req, res, next) => {
 // Optional: Check if email is verified
 export const emailVerifiedMiddleware = (req, res, next) => {
   if (!req.user.isEmailVerified) {
-    return res.status(403).json({ 
-      message: 'Email not verified. Please verify your email before proceeding.' 
+    return res.status(403).json({
+      message: 'Email not verified. Please verify your email before proceeding.'
     });
   }
   next();
@@ -96,8 +98,8 @@ export const emailVerifiedMiddleware = (req, res, next) => {
 // Optional: Check if profile is complete
 export const profileCompleteMiddleware = (req, res, next) => {
   if (!req.user.isProfileComplete) {
-    return res.status(403).json({ 
-      message: 'Profile not complete. Please complete your profile before proceeding.' 
+    return res.status(403).json({
+      message: 'Profile not complete. Please complete your profile before proceeding.'
     });
   }
   next();
