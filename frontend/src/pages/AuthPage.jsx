@@ -140,10 +140,9 @@ const AuthPage = () => {
       setError('Google login failed. Please try another method.');
       setLoading(false);
     },
-    flow: 'auth-code', // Change to auth-code flow
+    flow: 'auth-code', // Using authorization code flow
     scope: 'email profile',
-    ux_mode: 'popup',
-    // Generate and store a new code verifier before login
+    ux_mode: 'popup', // Keep popup mode with our new COOP headers
     onNonOAuthError: (error) => {
       console.error('Non-OAuth Error:', error);
       setError('Authentication initialization failed. Please try again.');
