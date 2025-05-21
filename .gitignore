@@ -23,11 +23,13 @@ node_modules
 # Environment files
 .env
 .env.local
+.env.development
 .env.development.local
 .env.test.local
 .env.production.local
-.env.*
-*.env
+.env.production
+# Allow example files
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -61,9 +63,15 @@ debug.log
 # Backend specific
 backend/logs/
 backend/.env
+backend/.env.development
+backend/.env.production
 backend/node_modules/
+!backend/.env.example
 
 # Frontend specific
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+frontend/.env.development
+frontend/.env.production
+!frontend/.env.example
