@@ -12,6 +12,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  tls: {
+    // Do not fail on invalid certs
+    rejectUnauthorized: false
+  },
+  // Add debug information
+  debug: process.env.NODE_ENV !== 'production'
 });
 
 
@@ -24,7 +30,7 @@ export const sendVerificationEmail = async (email, token) => {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
 
     const mailOptions = {
-      from: `"..." <${process.env.EMAIL_FROM}>`,
+      from: `"JobNest" <${process.env.EMAIL_USER}>`, // Use the actual Gmail address
       to: email,
       subject: 'Verify Your Email Address',
       html: `
@@ -66,7 +72,7 @@ export const sendPasswordResetEmail = async (email, token) => {
 
     // Email subject and content
     const mailOptions = {
-      from: `"JobNest" <${process.env.EMAIL_FROM}>`,
+      from: `"JobNest" <${process.env.EMAIL_USER}>`, // Use the actual Gmail address instead of EMAIL_FROM
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -123,7 +129,7 @@ export const sendPasswordResetEmail = async (email, token) => {
 export const sendWelcomeEmail = async (email, name) => {
   try {
     const mailOptions = {
-      from: `"JobNest" <${process.env.EMAIL_FROM}>`,
+      from: `"JobNest" <${process.env.EMAIL_USER}>`, // Use the actual Gmail address
       to: email,
       subject: 'Welcome to Our Platform!',
       html: `
