@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useGoogleLogin } from '@react-oauth/google';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import { Card, CardHeader, CardContent, CardTitle, CardFooter } from '../components/ui/card';
@@ -10,16 +10,72 @@ import api from '../lib/axios';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [codeVerifier, setCodeVerifier] = useState('');
+  const [codeVerifier, setCodeVerifier] = useState(() => {
+    // Try to get code verifier from localStorage
+    return localStorage.getItem('codeVerifier') || '';
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
+  // Check for Google OAuth redirect with code parameter
+  useEffect(() => {
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+
+    if (code) {
+      // We have a code from Google redirect, process it
+      setLoading(true);
+
+      // Set login/register state based on what was passed to Google
+      if (state === 'register') {
+        setIsLogin(false);
+      } else {
+        setIsLogin(true);
+      }
+
+      // Get the stored code verifier
+      const storedCodeVerifier = localStorage.getItem('codeVerifier');
+
+      if (storedCodeVerifier) {
+        // Exchange the code for tokens
+        api.post('/api/auth/google-token', {
+          code: code,
+          code_verifier: storedCodeVerifier
+        })
+        .then(response => {
+          // Handle successful authentication
+          handleAuthSuccess(response.data);
+          // Clean up
+          localStorage.removeItem('codeVerifier');
+        })
+        .catch(error => {
+          console.error('Google redirect auth error:', error);
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            'Google authentication failed. Please try again.';
+          setError(errorMessage);
+        })
+        .finally(() => {
+          setLoading(false);
+          // Clean up URL to remove the code
+          window.history.replaceState({}, document.title, '/auth');
+        });
+      } else {
+        setError('Authentication failed: Missing verification code. Please try again.');
+        setLoading(false);
+        window.history.replaceState({}, document.title, '/auth');
+      }
+    }
+  }, [searchParams, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -132,7 +188,7 @@ const AuthPage = () => {
     ).join('');
   };
 
-  // Update the googleLogin configuration
+  // Update the googleLogin configuration to use redirect flow instead of popup
   const googleLogin = useGoogleLogin({
     onSuccess: handleGoogleSuccess,
     onError: (error) => {
@@ -142,7 +198,9 @@ const AuthPage = () => {
     },
     flow: 'auth-code', // Using authorization code flow
     scope: 'email profile',
-    ux_mode: 'popup', // Keep popup mode with our new COOP headers
+    ux_mode: 'redirect', // Changed from popup to redirect to avoid COOP issues
+    redirect_uri: window.location.origin + '/auth', // Redirect back to the auth page
+    state: isLogin ? 'login' : 'register', // Pass login state through the OAuth flow
     onNonOAuthError: (error) => {
       console.error('Non-OAuth Error:', error);
       setError('Authentication initialization failed. Please try again.');
@@ -167,7 +225,9 @@ const AuthPage = () => {
             onClick={() => {
               // Generate and store a new code verifier before login
               const newCodeVerifier = generateCodeVerifier();
+              // Store in state and localStorage for redirect flow
               setCodeVerifier(newCodeVerifier);
+              localStorage.setItem('codeVerifier', newCodeVerifier);
               googleLogin();
             }}
             disabled={loading}
