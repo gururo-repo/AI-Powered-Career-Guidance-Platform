@@ -34,14 +34,16 @@ app.use(cookieParser());
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean),
+  origin: [
+    'http://localhost:5174',
+    'https://tools.gururo.com',
+    'https://ai-powered-career-guidance-platform.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token', 'Cache-Control'],
 }));
-
-// Log CORS configuration
-logger.info('CORS configured with origins:', ['http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean));
 
 // Session configuration
 app.use(session({
@@ -51,7 +53,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Allow cross-site cookies in production
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -62,9 +64,11 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
 
-  // Add Cross-Origin headers to fix window.closed errors
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  // Only set Cross-Origin headers for same-origin requests to avoid CORS conflicts
+  if (req.headers.origin === req.headers.host) {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  }
 
   next();
 });
@@ -80,6 +84,11 @@ app.use((req, res, next) => {
 
 // Add request logging middleware
 app.use(requestLogger);
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
 
 // Test route to verify API is working
 app.get('/api/test', (req, res) => {
