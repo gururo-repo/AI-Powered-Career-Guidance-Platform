@@ -48,7 +48,8 @@ const AuthPage = () => {
         // Exchange the code for tokens
         api.post('/api/auth/google-token', {
           code: code,
-          code_verifier: storedCodeVerifier
+          code_verifier: storedCodeVerifier,
+          redirect_uri: window.location.origin + '/auth'
         })
         .then(response => {
           // Handle successful authentication
@@ -132,7 +133,8 @@ const AuthPage = () => {
       // Exchange the code for tokens
       const tokenResponse = await api.post('/api/auth/google-token', {
         code: codeResponse.code,
-        code_verifier: codeVerifier
+        code_verifier: codeVerifier,
+        redirect_uri: window.location.origin + '/auth'
       });
 
       // Handle successful authentication

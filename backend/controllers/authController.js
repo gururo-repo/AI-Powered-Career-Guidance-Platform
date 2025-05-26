@@ -385,7 +385,7 @@ export const resetPassword = async (req, res) => {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
 
-      
+
       if (!user.isEmailVerified) {
         logger.info(`Marking email as verified during password reset for user: ${user._id}`);
         user.isEmailVerified = true;
@@ -513,10 +513,10 @@ export const googleAuth = async (req, res) => {
         isEmailVerified: true,
       });
 
-      
+
       logger.info(`New Google SSO user created: ${user._id}`, { userId: user._id, email });
     } else {
-      
+
       user.googleId = googleId;
       user.isEmailVerified = true;
       user.authProvider = "google";
@@ -525,15 +525,15 @@ export const googleAuth = async (req, res) => {
       }
       await user.save();
 
- 
+
       logger.info(`Google SSO login: ${user._id}`, { userId: user._id, email });
     }
 
-    
+
     user.lastLogin = Date.now();
     await user.save();
 
-   
+
     const token = generateToken(user._id);
 
     res.json({
@@ -650,7 +650,7 @@ export const facebookAuth = async (req, res) => {
 // export const googleTokenExchange = async (req, res) => {
 //   try {
 //     const { code } = req.body;
-    
+
 //     if (!code) {
 //       return res.status(400).json({ message: "No code provided" });
 //     }
@@ -686,7 +686,7 @@ export const facebookAuth = async (req, res) => {
 //         authProvider: "google",
 //         isEmailVerified: true,
 //       });
-      
+
 //       logger.info(`New Google SSO user created: ${user._id}`);
 //     } else {
 //       // Update existing user
@@ -697,7 +697,7 @@ export const facebookAuth = async (req, res) => {
 //         user.profilePicture = picture;
 //       }
 //       await user.save();
-      
+
 //       logger.info(`Google SSO login: ${user._id}`);
 //     }
 
@@ -732,13 +732,14 @@ export const facebookAuth = async (req, res) => {
 // };
 export const googleTokenExchange = async (req, res) => {
   try {
-    const { code, code_verifier } = req.body;
-    
-    logger.info("Google token exchange attempt", { 
+    const { code, code_verifier, redirect_uri } = req.body;
+
+    logger.info("Google token exchange attempt", {
       codeLength: code ? code.length : 0,
-      hasVerifier: !!code_verifier
+      hasVerifier: !!code_verifier,
+      redirectUri: redirect_uri
     });
-    
+
     if (!code) {
       return res.status(400).json({ message: "No code provided" });
     }
@@ -746,10 +747,29 @@ export const googleTokenExchange = async (req, res) => {
     // Make sure these environment variables are set correctly
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
-    
-    logger.info("Google OAuth config", { 
-      clientId: clientId ? `${clientId.substring(0, 10)}...` : "missing", 
+
+    // Use redirect_uri from request if provided, otherwise fall back to env variable
+    const redirectUri = redirect_uri || process.env.GOOGLE_REDIRECT_URI;
+
+    // Validate that the redirect URI is one of our allowed domains
+    const allowedDomains = [
+      'https://tools.gururo.com',
+      'https://ai-powered-career-guidance-platform.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:5174'
+    ];
+
+    const isValidRedirectUri = allowedDomains.some(domain =>
+      redirectUri && redirectUri.startsWith(domain)
+    );
+
+    if (!isValidRedirectUri) {
+      logger.error("Invalid redirect URI", { redirectUri, allowedDomains });
+      return res.status(400).json({ message: "Invalid redirect URI" });
+    }
+
+    logger.info("Google OAuth config", {
+      clientId: clientId ? `${clientId.substring(0, 10)}...` : "missing",
       clientSecret: clientSecret ? "present" : "missing",
       redirectUri: redirectUri || "missing"
     });
@@ -761,18 +781,18 @@ export const googleTokenExchange = async (req, res) => {
       client_secret: clientSecret,
       redirect_uri: redirectUri
     };
-   
+
     if (code_verifier) {
       tokenParams.code_verifier = code_verifier;
     }
 
-    
 
 
 
 
 
- 
+
+
 
     const { tokens } = await oauth2Client.getToken(tokenParams);
 
@@ -799,7 +819,7 @@ export const googleTokenExchange = async (req, res) => {
         authProvider: "google",
         isEmailVerified: true,
       });
-      
+
       logger.info(`New Google SSO user created: ${user._id}`);
     } else {
       // Update existing user
@@ -810,7 +830,7 @@ export const googleTokenExchange = async (req, res) => {
         user.profilePicture = picture;
       }
       await user.save();
-      
+
       logger.info(`Google SSO login: ${user._id}`);
     }
 
@@ -840,7 +860,7 @@ export const googleTokenExchange = async (req, res) => {
     });
   } catch (error) {
     logger.error("Google token exchange error:", error);
-    
+
     // Add more detailed logging for debugging
     if (error.response) {
       logger.error("Google API error details:", {
@@ -848,7 +868,7 @@ export const googleTokenExchange = async (req, res) => {
         data: error.response.data
       });
     }
-    
+
     res.status(500).json({ message: "Authentication failed" });
   }
 };
