@@ -370,7 +370,7 @@ function IndustryInsightsPage() {
               title="Career Planning"
               description="Get personalized career path recommendations"
               actionText="View Paths"
-              onClick={() => {}}
+              onClick={() => document.getElementById('career-paths')?.scrollIntoView({ behavior: 'smooth' })}
               className="hover:translate-y-px transition-all h-full"
             />
           </div>
@@ -550,7 +550,7 @@ function IndustryInsightsPage() {
 
           {/* Career Path Insights */}
           {hasCareerPathInsights && (
-            <div className="bg-gradient-to-br from-zinc-800/80 to-zinc-900 p-6 rounded-xl border border-zinc-700 shadow-lg">
+            <div id="career-paths" className="bg-gradient-to-br from-zinc-800/80 to-zinc-900 p-6 rounded-xl border border-zinc-700 shadow-lg">
               <h3 className="text-xl font-semibold text-cyan-50 mb-4 flex items-center">
                 <FaArrowUp className="mr-3 text-cyan-400" />
                 Career Path Insights
