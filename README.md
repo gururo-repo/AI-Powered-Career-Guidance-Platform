@@ -5,7 +5,7 @@
   <p>Bridge skill gaps, compare opportunities globally, and land your dream job with AI-powered insights</p>
 </div>
 
-
+🌐 **Live Demo**: [https://tools.gururo.com](https://tools.gururo.com)
 
 ## ✨ Features
 
