@@ -131,18 +131,17 @@ export const generateInsights = async (req, res) => {
             let formattedQuickInsights = [];
             if (aiInsights.quickInsights && typeof aiInsights.quickInsights === 'string') {
                 try {
-                  // It appears to be a string representation of an array
-                  const cleanedString = aiInsights.quickInsights
-                    .replace(/'/g, '"')       // Replace single quotes with double quotes
-                    .replace(/(\w+):/g, '"$1":'); // Add quotes around keys
-
-                  aiInsights.quickInsights = JSON.parse(cleanedString);
+                    const cleanedString = aiInsights.quickInsights
+                        .replace(/'/g, '"')
+                        .replace(/(\w+):/g, '"$1":');
+                    formattedQuickInsights = JSON.parse(cleanedString);
                 } catch (error) {
-                  console.error("Failed to parse quickInsights string:", error);
-                  aiInsights.quickInsights = []; // Fallback to empty array
+                    console.error("Failed to parse quickInsights string:", error);
+                    formattedQuickInsights = [];
                 }
-              }
-
+            } else if (Array.isArray(aiInsights.quickInsights)) {
+                formattedQuickInsights = aiInsights.quickInsights;
+            }
 
             // Transform AI insights to match frontend expectations
             const transformedInsights = {
