@@ -15,6 +15,33 @@ export const getInsights = async (req, res) => {
           return res.status(404).json({ message: "No insights found. Please generate insights first." });
         }
 
+        // Check if insights need updating
+        if (insights.needsUpdate()) {
+          console.log('Insights need updating, generating new insights...');
+          // Get user data to generate new insights
+          const user = await User.findById(userId);
+          if (!user) {
+            return res.status(404).json({ message: "User not found" });
+          }
+
+          // Generate new insights
+          const newInsights = await generateIndustryInsights({
+            industry: user.industry,
+            subIndustry: user.subIndustry,
+            experience: user.experience,
+            skills: user.skills,
+            country: user.country,
+            salaryExpectation: user.salaryExpectation,
+            isIndianData: user.country?.toLowerCase().includes('india')
+          });
+
+          // Update existing insight with new data
+          Object.assign(insights, newInsights);
+          insights.lastUpdated = new Date();
+          insights.nextUpdate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+          await insights.save();
+        }
+
         // If zipCode is provided in the query, adjust the insights for that location
         if (zipCode) {
           insights = await adjustInsightsForLocation(insights, zipCode);
