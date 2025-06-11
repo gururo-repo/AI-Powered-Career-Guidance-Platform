@@ -15,33 +15,6 @@ export const getInsights = async (req, res) => {
           return res.status(404).json({ message: "No insights found. Please generate insights first." });
         }
 
-        // Check if insights need updating
-        if (insights.needsUpdate()) {
-          console.log('Insights need updating, generating new insights...');
-          // Get user data to generate new insights
-          const user = await User.findById(userId);
-          if (!user) {
-            return res.status(404).json({ message: "User not found" });
-          }
-
-          // Generate new insights
-          const newInsights = await generateIndustryInsights({
-            industry: user.industry,
-            subIndustry: user.subIndustry,
-            experience: user.experience,
-            skills: user.skills,
-            country: user.country,
-            salaryExpectation: user.salaryExpectation,
-            isIndianData: user.country?.toLowerCase().includes('india')
-          });
-
-          // Update existing insight with new data
-          Object.assign(insights, newInsights);
-          insights.lastUpdated = new Date();
-          insights.nextUpdate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-          await insights.save();
-        }
-
         // If zipCode is provided in the query, adjust the insights for that location
         if (zipCode) {
           insights = await adjustInsightsForLocation(insights, zipCode);
@@ -129,25 +102,20 @@ export const generateInsights = async (req, res) => {
 
             // Make sure quickInsights is properly formatted
             let formattedQuickInsights = [];
-            if (aiInsights.quickInsights) {
-                if (typeof aiInsights.quickInsights === 'string') {
-                    try {
-                        formattedQuickInsights = JSON.parse(
-                            aiInsights.quickInsights
-                                .replace(/'/g, '"')
-                                .replace(/(\w+):/g, '"$1":')
-                        );
-                        if (typeof formattedQuickInsights === 'string') {
-                            formattedQuickInsights = eval('(' + formattedQuickInsights + ')');
-                        }
-                    } catch (error) {
-                        console.error("Failed to parse quickInsights string:", error);
-                        formattedQuickInsights = [];
-                    }
-                } else if (Array.isArray(aiInsights.quickInsights)) {
-                    formattedQuickInsights = aiInsights.quickInsights;
+            if (aiInsights.quickInsights && typeof aiInsights.quickInsights === 'string') {
+                try {
+                  // It appears to be a string representation of an array
+                  const cleanedString = aiInsights.quickInsights
+                    .replace(/'/g, '"')       // Replace single quotes with double quotes
+                    .replace(/(\w+):/g, '"$1":'); // Add quotes around keys
+
+                  aiInsights.quickInsights = JSON.parse(cleanedString);
+                } catch (error) {
+                  console.error("Failed to parse quickInsights string:", error);
+                  aiInsights.quickInsights = []; // Fallback to empty array
                 }
-            }
+              }
+
 
             // Transform AI insights to match frontend expectations
             const transformedInsights = {
@@ -546,4 +514,3 @@ const getIndianRegionFromZipCode = (zipCode) => {
 
     return regionMap[firstDigit] || 'Unknown Region';
 };
-
