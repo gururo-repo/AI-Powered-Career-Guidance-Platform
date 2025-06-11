@@ -15,27 +15,6 @@ export const getInsights = async (req, res) => {
           return res.status(404).json({ message: "No insights found. Please generate insights first." });
         }
 
-        // Only update insights if a week has passed
-        if (insights.needsUpdate()) {
-          // Get user data to generate new insights
-          const user = await User.findById(userId);
-          if (user) {
-            const newInsights = await generateIndustryInsights({
-              industry: user.industry,
-              subIndustry: user.subIndustry,
-              experience: user.experience,
-              skills: user.skills,
-              country: user.country,
-              salaryExpectation: user.salaryExpectation,
-              isIndianData: user.country?.toLowerCase().includes('india')
-            });
-            Object.assign(insights, newInsights);
-            insights.lastUpdated = new Date();
-            insights.nextUpdate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-            await insights.save();
-          }
-        }
-
         // If zipCode is provided in the query, adjust the insights for that location
         if (zipCode) {
           insights = await adjustInsightsForLocation(insights, zipCode);
@@ -515,10 +494,8 @@ const adjustInsightsForLocation = async (insights, zipCode) => {
     }
 };
 
-// Helper function to determine Indian region from zip code
 const getIndianRegionFromZipCode = (zipCode) => {
-    // This is a simplified mapping of Indian postal code prefixes to regions
-    // A more comprehensive solution would use a proper database
+  
     const firstDigit = zipCode.charAt(0);
 
     const regionMap = {
