@@ -129,18 +129,24 @@ export const generateInsights = async (req, res) => {
 
             // Make sure quickInsights is properly formatted
             let formattedQuickInsights = [];
-            if (aiInsights.quickInsights && typeof aiInsights.quickInsights === 'string') {
-                try {
-                    const cleanedString = aiInsights.quickInsights
-                        .replace(/'/g, '"')
-                        .replace(/(\w+):/g, '"$1":');
-                    formattedQuickInsights = JSON.parse(cleanedString);
-                } catch (error) {
-                    console.error("Failed to parse quickInsights string:", error);
-                    formattedQuickInsights = [];
+            if (aiInsights.quickInsights) {
+                if (typeof aiInsights.quickInsights === 'string') {
+                    try {
+                        formattedQuickInsights = JSON.parse(
+                            aiInsights.quickInsights
+                                .replace(/'/g, '"')
+                                .replace(/(\w+):/g, '"$1":')
+                        );
+                        if (typeof formattedQuickInsights === 'string') {
+                            formattedQuickInsights = eval('(' + formattedQuickInsights + ')');
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse quickInsights string:", error);
+                        formattedQuickInsights = [];
+                    }
+                } else if (Array.isArray(aiInsights.quickInsights)) {
+                    formattedQuickInsights = aiInsights.quickInsights;
                 }
-            } else if (Array.isArray(aiInsights.quickInsights)) {
-                formattedQuickInsights = aiInsights.quickInsights;
             }
 
             // Transform AI insights to match frontend expectations
