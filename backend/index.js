@@ -38,6 +38,7 @@ app.use(cors({
     'http://localhost:5174',
     'https://tools.gururo.com',
     'https://ai-powered-career-guidance-platform.vercel.app',
+    'https://ai-powered-career-guidance-platform-nine.vercel.app',
     process.env.FRONTEND_URL
   ].filter(Boolean),
   credentials: true,
