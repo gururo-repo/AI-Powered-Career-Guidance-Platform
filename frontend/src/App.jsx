@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import LandingPage from './pages/Landingpage';
 import OnBoarding from './pages/OnBoarding';
@@ -17,78 +17,87 @@ import './index.css';
 function App() {
   return (
     <Router>
-      <Header/>
-      <div className='min-h-screen'>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/jobnest" element={<LandingPage />} />
-          <Route path="/jobnest/auth" element={<AuthPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/jobnest/forgot-password" element={<ForgotPassword />} />
-          <Route path="/jobnest/reset-password/:token" element={<ResetPassword />} />
+      <Routes>
+        {/* Auth callback route */}
+        <Route path="/auth" element={<AuthPage />} />
+        
+        {/* Main app routes with /jobnest base path */}
+        <Route path="/jobnest/*" element={
+          <Router basename="/jobnest">
+            <Header/>
+            <div className='min-h-screen'>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* Protected routes */}
-          <Route
-            path="/jobnest/onboarding"
-            element={
-              <ProtectedRoute>
-                <OnBoarding />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/jobnest/profile/edit"
-            element={
-              <ProtectedRoute>
-                <ProfileEdit />
-              </ProtectedRoute>
-            }
-          />
+                {/* Protected routes */}
+                <Route
+                  path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <OnBoarding />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile/edit"
+                  element={
+                    <ProtectedRoute>
+                      <ProfileEdit />
+                    </ProtectedRoute>
+                  }
+                />
 
-          {/* Main protected routes */}
-          <Route path="/jobnest/industry-insights" element={
-            <ProtectedRoute>
-              <IndustryInsightsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/jobnest/comparison" element={
-            <ProtectedRoute>
-              <ComparisonPage />
-            </ProtectedRoute>
-          } />
+                {/* Main protected routes */}
+                <Route path="/industry-insights" element={
+                  <ProtectedRoute>
+                    <IndustryInsightsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/comparison" element={
+                  <ProtectedRoute>
+                    <ComparisonPage />
+                  </ProtectedRoute>
+                } />
 
-          {/* Tools routes */}
-          <Route path="/jobnest/resume-generator" element={
-            <ProtectedRoute>
-              <ResumeBuilder />
-            </ProtectedRoute>
-          } />
+                {/* Tools routes */}
+                <Route path="/resume-generator" element={
+                  <ProtectedRoute>
+                    <ResumeBuilder />
+                  </ProtectedRoute>
+                } />
 
-          {/* Competency Test Routes */}
-          <Route path="/jobnest/competency-test" element={
-            <ProtectedRoute>
-              <CompetencyTest page="categories" />
-            </ProtectedRoute>
-          } />
-          <Route path="/jobnest/competency-test/quiz/:categoryId" element={
-            <ProtectedRoute>
-              <CompetencyTest page="quiz" />
-            </ProtectedRoute>
-          } />
-          <Route path="/jobnest/competency-test/results" element={
-            <ProtectedRoute>
-              <CompetencyTest page="results" />
-            </ProtectedRoute>
-          } />
+                {/* Competency Test Routes */}
+                <Route path="/competency-test" element={
+                  <ProtectedRoute>
+                    <CompetencyTest page="categories" />
+                  </ProtectedRoute>
+                } />
+                <Route path="/competency-test/quiz/:categoryId" element={
+                  <ProtectedRoute>
+                    <CompetencyTest page="quiz" />
+                  </ProtectedRoute>
+                } />
+                <Route path="/competency-test/results" element={
+                  <ProtectedRoute>
+                    <CompetencyTest page="results" />
+                  </ProtectedRoute>
+                } />
 
-          {/* Legacy routes for backward compatibility */}
-          <Route path="/jobnest/dashboard/industry-insights" element={
-            <ProtectedRoute>
-              <IndustryInsightsPage />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </div>
+                {/* Legacy routes for backward compatibility */}
+                <Route path="/dashboard/industry-insights" element={
+                  <ProtectedRoute>
+                    <IndustryInsightsPage />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </div>
+          </Router>
+        } />
+      </Routes>
     </Router>
   );
 }
