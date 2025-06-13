@@ -16,7 +16,7 @@ import './index.css';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/jobnest">
       <Header/>
       <div className='min-h-screen'>
         <Routes>
