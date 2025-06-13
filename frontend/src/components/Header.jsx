@@ -21,7 +21,7 @@ function Header() {
         <img
           src={logo} 
           alt="gururo"                        
-          className='h-12 py-1 px-0 w-auto'
+          className='h-16 py-1 px-0 w-auto'
         />
       </Link>
     </div>
