@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
@@ -11,6 +11,7 @@ import api from '../lib/axios';
 const AuthPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { state } = useParams();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,14 @@ const AuthPage = () => {
     password: '',
     confirmPassword: ''
   });
+
+  // Set initial login/register state based on URL parameters
+  useEffect(() => {
+    const signup = searchParams.get('signup');
+    if (signup === 'true') {
+      setIsLogin(false);
+    }
+  }, [searchParams]);
 
   // Check for Google OAuth redirect with code parameter
   useEffect(() => {
@@ -68,12 +77,12 @@ const AuthPage = () => {
         .finally(() => {
           setLoading(false);
           // Clean up URL to remove the code
-          window.history.replaceState({}, document.title, '/auth');
+          window.history.replaceState({}, document.title, '/jobnest/auth');
         });
       } else {
         setError('Authentication failed: Missing verification code. Please try again.');
         setLoading(false);
-        window.history.replaceState({}, document.title, '/auth');
+        window.history.replaceState({}, document.title, '/jobnest/auth');
       }
     }
   }, [searchParams, navigate]);

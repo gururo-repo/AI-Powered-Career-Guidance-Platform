@@ -4,6 +4,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/jobnest/auth",
+      "destination": "/auth"
+    },
+    {
+      "source": "/jobnest/auth/:path*",
+      "destination": "/auth/:path*"
+    },
+    {
       "source": "/jobnest/:path*",
       "destination": "/:path*"
     },
