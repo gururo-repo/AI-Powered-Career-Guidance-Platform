@@ -49,7 +49,7 @@ const AuthPage = () => {
         api.post('/api/auth/google-token', {
           code: code,
           code_verifier: storedCodeVerifier,
-          redirect_uri: window.location.origin + '/auth'
+          redirect_uri: window.location.origin + '/jobnest/auth'
         })
         .then(response => {
           // Handle successful authentication
@@ -134,7 +134,7 @@ const AuthPage = () => {
       const tokenResponse = await api.post('/api/auth/google-token', {
         code: codeResponse.code,
         code_verifier: codeVerifier,
-        redirect_uri: window.location.origin + '/auth'
+        redirect_uri: window.location.origin + '/jobnest/auth'
       });
 
       // Handle successful authentication
@@ -201,7 +201,7 @@ const AuthPage = () => {
     flow: 'auth-code', // Using authorization code flow
     scope: 'email profile',
     ux_mode: 'redirect', // Changed from popup to redirect to avoid COOP issues
-    redirect_uri: window.location.origin + '/auth', // Redirect back to the auth page
+    redirect_uri: window.location.origin + '/jobnest/auth', // Redirect back to the auth page
     state: isLogin ? 'login' : 'register', // Pass login state through the OAuth flow
     onNonOAuthError: (error) => {
       console.error('Non-OAuth Error:', error);

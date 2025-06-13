@@ -17,74 +17,79 @@ import './index.css';
 function App() {
   return (
     <Router basename="/jobnest">
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <div className="min-h-screen">
+        <Header />
+        <div className="pt-16">
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Protected routes */}
-        <Route
-          path="/onboarding"
-          element={
-            <ProtectedRoute>
-              <OnBoarding />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/edit"
-          element={
-            <ProtectedRoute>
-              <ProfileEdit />
-            </ProtectedRoute>
-          }
-        />
+            {/* Protected routes */}
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <OnBoarding />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute>
+                  <ProfileEdit />
+                </ProtectedRoute>
+              }
+            />
 
-        {/* Main protected routes */}
-        <Route path="/industry-insights" element={
-          <ProtectedRoute>
-            <IndustryInsightsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/comparison" element={
-          <ProtectedRoute>
-            <ComparisonPage />
-          </ProtectedRoute>
-        } />
+            {/* Main protected routes */}
+            <Route path="/industry-insights" element={
+              <ProtectedRoute>
+                <IndustryInsightsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/comparison" element={
+              <ProtectedRoute>
+                <ComparisonPage />
+              </ProtectedRoute>
+            } />
 
-        {/* Tools routes */}
-        <Route path="/resume-generator" element={
-          <ProtectedRoute>
-            <ResumeBuilder />
-          </ProtectedRoute>
-        } />
+            {/* Tools routes */}
+            <Route path="/resume-generator" element={
+              <ProtectedRoute>
+                <ResumeBuilder />
+              </ProtectedRoute>
+            } />
 
-        {/* Competency Test Routes */}
-        <Route path="/competency-test" element={
-          <ProtectedRoute>
-            <CompetencyTest page="categories" />
-          </ProtectedRoute>
-        } />
-        <Route path="/competency-test/quiz/:categoryId" element={
-          <ProtectedRoute>
-            <CompetencyTest page="quiz" />
-          </ProtectedRoute>
-        } />
-        <Route path="/competency-test/results" element={
-          <ProtectedRoute>
-            <CompetencyTest page="results" />
-          </ProtectedRoute>
-        } />
+            {/* Competency Test Routes */}
+            <Route path="/competency-test" element={
+              <ProtectedRoute>
+                <CompetencyTest page="categories" />
+              </ProtectedRoute>
+            } />
+            <Route path="/competency-test/quiz/:categoryId" element={
+              <ProtectedRoute>
+                <CompetencyTest page="quiz" />
+              </ProtectedRoute>
+            } />
+            <Route path="/competency-test/results" element={
+              <ProtectedRoute>
+                <CompetencyTest page="results" />
+              </ProtectedRoute>
+            } />
 
-        {/* Legacy routes for backward compatibility */}
-        <Route path="/dashboard/industry-insights" element={
-          <ProtectedRoute>
-            <IndustryInsightsPage />
-          </ProtectedRoute>
-        } />
-      </Routes>
+            {/* Legacy routes for backward compatibility */}
+            <Route path="/dashboard/industry-insights" element={
+              <ProtectedRoute>
+                <IndustryInsightsPage />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </div>
+      </div>
     </Router>
   );
 }
