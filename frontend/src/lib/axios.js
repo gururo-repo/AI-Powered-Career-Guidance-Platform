@@ -1,9 +1,8 @@
-
 import axios from 'axios';
 
 // Create an Axios instance with default configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   timeout: 60000, // Increased timeout to 60 seconds for Gemini AI calls
   headers: {
     'Content-Type': 'application/json',
@@ -37,7 +36,7 @@ api.interceptors.response.use(
       // Unauthorized - token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
-
+      window.location.href = '/jobnest/auth';
     }
 
     return Promise.reject(error);

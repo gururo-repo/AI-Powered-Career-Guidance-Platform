@@ -65,7 +65,7 @@ const AuthStatus = () => {
       <div className="flex-grow flex justify-center">
         <ul className="hidden md:flex px-4 mx-auto font-semibold space-x-8 mr-2">
           {isLoggedIn && (
-              <li><Link to="/industry-insights" className="hover:text-cyan-300">Industry Insights</Link></li>
+              <li><Link to="/jobnest/industry-insights" className="hover:text-cyan-300">Industry Insights</Link></li>
             )}
         </ul>
       </div>
@@ -86,14 +86,14 @@ const AuthStatus = () => {
             {toolsDropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg py-2 z-50">
                 <Link 
-                  to="/resume-generator" 
+                  to="/jobnest/resume-generator" 
                   className="block px-4 py-2 text-cyan-50 hover:bg-zinc-700 flex items-center"
                 >
                   <FaFileAlt className="mr-2 text-cyan-400" />
                   Resume Generator
                 </Link>
                 <Link 
-                  to="/competency-test" 
+                  to="/jobnest/competency-test" 
                   className="block px-4 py-2 text-cyan-50 hover:bg-zinc-700 flex items-center"
                 >
                   <FaClipboardCheck className="mr-2 text-cyan-400" />
@@ -129,7 +129,7 @@ const AuthStatus = () => {
                   <p className="text-cyan-400 text-xs truncate">{user?.email}</p>
                 </div>
                 <Link 
-                  to="/profile/edit" 
+                  to="/jobnest/profile/edit" 
                   className="block px-4 py-2 text-cyan-50 hover:bg-zinc-700 flex items-center"
                 >
                   <FaUser className="mr-2 text-cyan-400" />
@@ -148,7 +148,7 @@ const AuthStatus = () => {
         </div>
       ) : (
         <Button variant="outline">
-          <Link to="/auth?signup=true">
+          <Link to="/jobnest/auth?signup=true">
             Sign Up
           </Link>
         </Button>

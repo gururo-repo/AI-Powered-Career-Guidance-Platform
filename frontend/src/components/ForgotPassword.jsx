@@ -101,7 +101,7 @@ const ForgotPassword = () => {
         </CardContent>
         <CardFooter>
           <div className="text-center w-full text-sm text-zinc-400">
-            <Link to="/auth" className="text-cyan-400 hover:underline">
+            <Link to="/jobnest/auth" className="text-cyan-400 hover:underline">
               Back to Login
             </Link>
           </div>
