@@ -15,6 +15,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
+    manifest: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
@@ -22,7 +23,8 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks: undefined
       }
     }
   },
